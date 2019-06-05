@@ -5,6 +5,7 @@ Parameters:
   GitHubUser:
     Type: String
     Description: GitHub User
+    Default: "Krakenhaus"
   GitHubRepo:
     Type: String
     Description: GitHub Repo to pull from. Only the Name. not the URL
@@ -26,7 +27,7 @@ Parameters:
     Description: The build compute type to use for building the app
   BuildImage:
     Type: String
-    Default: "aws/codebuild/ubuntu-base:14.04"
+    Default: "aws/codebuild/standard:2.0"
     Description: The build image to use for building the app
 
 Resources:
@@ -48,9 +49,34 @@ Resources:
         BuildSpec: !Sub |
           version: 0.2
           phases:
+            install:
+              runtime-versions:
+                nodejs: 10
+              commands:
+                - echo Entered the install phase...
+                - apt-get update -y
+                - apt-get install apt-transport-https
+                - apt-get install build-essential libssl-dev
+                # Setup for Yarn
+                - curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
+                - echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
+                # Do it!
+                - apt-get update -y
+                - apt-get install -y yarn
+            pre_build:
+              commands:
+                - echo Entered the pre_build phase...
+                - echo `ls`
+                - yarn install
+            build:
+              commands:
+                - echo Entered the build phase...
+                - yarn run build
+                - echo `ls`
             post_build:
               commands:
-                - aws s3 cp --recursive --acl public-read ./build s3://${SiteBucketName}/
+                - echo `ls build/`
+                - aws s3 cp --recursive --acl public-read build/ s3://${SiteBucketName}/
           artifacts:
             type: zip
             files:
