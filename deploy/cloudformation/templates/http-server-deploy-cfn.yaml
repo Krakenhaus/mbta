@@ -54,7 +54,7 @@ Resources:
           artifacts:
             type: zip
             files:
-              - ./html/index.html
+              - ./build/index.html
       TimeoutInMinutes: 5
   Pipeline:
     Type: AWS::CodePipeline::Pipeline
