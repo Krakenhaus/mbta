@@ -66,16 +66,13 @@ Resources:
             pre_build:
               commands:
                 - echo Entered the pre_build phase...
-                - echo `ls`
                 - yarn install
             build:
               commands:
                 - echo Entered the build phase...
                 - yarn run build
-                - echo `ls`
             post_build:
               commands:
-                - echo `ls build/`
                 - aws s3 cp --recursive --acl public-read build/ s3://${SiteBucketName}/
           artifacts:
             type: zip
